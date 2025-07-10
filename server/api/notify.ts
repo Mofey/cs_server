@@ -1,7 +1,7 @@
 // api/notify.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withCors } from '../lib/cors';
-import { pool, mailer } from '../lib/db';
+import { withCors } from '../../lib/cors';
+import { pool, mailer } from '../../lib/db';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST (preflight is handled by withCors)

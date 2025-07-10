@@ -8,14 +8,14 @@
   ],
   "routes": [
     {
-      "src": "/api/notify",
-      "dest": "/server/api/notify.ts",
-      "methods": ["POST", "OPTIONS"]
+      "src": "/api/(.*)",
+      "dest": "/server/api/$1.ts",
+      "methods": ["GET", "POST", "OPTIONS"]
     },
     {
-      "src": "/api/?",
+      "src": "/api",
       "dest": "/server/api/index.ts",
-      "methods": ["GET", "OPTIONS"]
+      "methods": ["GET", "POST", "OPTIONS"]
     }
   ]
 }

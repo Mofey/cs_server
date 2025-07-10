@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withCors } from '../lib/cors';
+import { withCors } from '../../lib/cors';
 
 async function handler(req: VercelRequest, res: VercelResponse) {
   // For a preflight
