@@ -18,8 +18,6 @@ dotenv.config(); // Loads environment variables from .env file
 const app = express();
 app.use(express.json());
 
-app.use('*', cors())
-
 // Configure CORS middleware
 app.use(cors({
   origin: ['*'], // All origins
@@ -69,6 +67,10 @@ app.post('/api/notify', async (req: Request, res: Response) => {
     console.error('Notify error:', err);
     res.status(500).json({ error: 'Failed to save or send email' });
   }
+});
+
+app.get('/', (req: Request, res: Response) => {
+  res.send('🚀 Server is running!');
 });
 
 const PORT = process.env.PORT || 5000;
