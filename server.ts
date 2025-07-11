@@ -11,12 +11,9 @@ const app = express();
 //JSON body parser middleware
 app.use(express.json());
 
-// —————— 1) MANUAL CORS MIDDLEWARE ——————
+// MANUAL CORS MIDDLEWARE
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'https://comingsoon-three-omega.vercel.app'
-  ];
+  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
   
   const origin = req.headers.origin;
 
@@ -35,7 +32,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 
-
 const pool = new Pool({
   host: process.env.PGHOST,
   database: process.env.PGDATABASE,
@@ -44,6 +40,7 @@ const pool = new Pool({
   port: Number(process.env.PGPORT) || 5432,
   ssl: { rejectUnauthorized: false }, // Neon requires SSL
 });
+
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -88,6 +85,7 @@ app.post('/api/notify', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Failed to save or send email' });
   }
 });
+
 
 app.get('/', (req: Request, res: Response) => {
   res.send('🚀 Server is running!');
