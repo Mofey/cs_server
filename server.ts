@@ -1,8 +1,31 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+dotenv.config(); // Loads environment variables from .env file
+
+import express, { Request, Response, NextFunction } from 'express';
+// import cors from 'cors';
+import nodemailer from 'nodemailer';
 import { Pool } from 'pg';
+
+const app = express();
+
+//JSON body parser middleware
+app.use(express.json());
+
+// —————— 1) MANUAL CORS MIDDLEWARE ——————
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // allow your front‑end origin
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');  
+  // allow these methods
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');      
+  // allow this header
+  res.header('Access-Control-Allow-Headers', 'Content-Type');          
+  // if it’s a preflight OPTIONS request, end right here:
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 
 const pool = new Pool({
   host: process.env.PGHOST,
@@ -12,18 +35,6 @@ const pool = new Pool({
   port: Number(process.env.PGPORT) || 5432,
   ssl: { rejectUnauthorized: false }, // Neon requires SSL
 });
-
-dotenv.config(); // Loads environment variables from .env file
-
-const app = express();
-app.use(express.json());
-
-// Configure CORS middleware
-app.use(cors({
-  origin: ['*'], // All origins
-  methods: ['POST'], // All http methods
-  credentials: true // If you need to send cookies
-}));
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
