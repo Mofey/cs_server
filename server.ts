@@ -13,18 +13,27 @@ app.use(express.json());
 
 // —————— 1) MANUAL CORS MIDDLEWARE ——————
 app.use((req: Request, res: Response, next: NextFunction) => {
-  // allow your front‑end origin
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');  
-  // allow these methods
-  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');      
-  // allow this header
-  res.header('Access-Control-Allow-Headers', 'Content-Type');          
-  // if it’s a preflight OPTIONS request, end right here:
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'https://comingsoon-three-omega.vercel.app'
+  ];
+  
+  const origin = req.headers.origin;
+
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
+
   next();
 });
+
 
 
 const pool = new Pool({
