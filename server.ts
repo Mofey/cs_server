@@ -44,6 +44,8 @@ const pool = new Pool({
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  secure: true, // Use secure connection
+  port: 465, // Gmail's secure SMTP port
   auth: {
     user: process.env.GMAIL_USER, // Your Gmail address
     pass: process.env.GMAIL_PASS, // Your Gmail app password (NOT your Gmail login password)
@@ -54,35 +56,39 @@ app.post('/api/notify', async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email required' });
 
+  let client;
   try {
-    // Store the user's email in the database
-    await pool.query(
+    client = await pool.connect(); // 👈 safe connection
+
+    console.log('📝 Inserting email into DB...');
+    await client.query(
       'INSERT INTO subscribers (email) VALUES ($1) ON CONFLICT (email) DO NOTHING',
       [email]
     );
 
-    // Notify mohfey@gmail.com about the new subscriber
+    console.log('📨 Sending admin notification...');
     await transporter.sendMail({
-      from: `"Coming Soon" <${process.env.GMAIL_USER}>`,
-      to: 'mohfey@gmail.com',
+      from: 'Coming Soon <{process.env.GMAIL_USER}>',
+      to: process.env.GMAIL_USER, // Admin email
       subject: 'New subscriber for site launch notification!',
-      text: `A new user has signed up to be notified: ${email}`,
-      html: `<p>A new user has signed up to be notified: <strong>${email}</strong></p>`,
+      html: `<p><strong>${email}</strong> just subscribed!</p>`,
     });
 
-    // (Optional) Send a confirmation to the user
-    // await transporter.sendMail({
-    //   from: `"Coming Soon" <${process.env.GMAIL_USER}>`,
-    //   to: email,
-    //   subject: 'You’ll be notified when we launch!',
-    //   text: 'Thanks for signing up! We’ll let you know as soon as the new site is live.',
-    //   html: '<p>Thanks for signing up! We’ll let you know as soon as the new site is live.</p>',
-    // });
+    console.log('✅ Sending confirmation to ' + email );
+    await transporter.sendMail({
+      from: 'Coming Soon <{process.env.GMAIL_USER}>',
+      to: email,
+      subject: 'You’re subscribed!',
+      html: '<p>Thanks for signing up! You’ll be notified when we launch.</p>',
+    });
 
+    console.log('🎉 All emails sent. Sending response...');
     res.json({ success: true });
   } catch (err) {
-    console.error('Notify error:', err);
+    console.error('❌ Notify error:', err);
     res.status(500).json({ error: 'Failed to save or send email' });
+  } finally {
+    if (client) client.release(); // 👈 release connection
   }
 });
 
