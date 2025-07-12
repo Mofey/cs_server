@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config(); // Loads environment variables from .env file
 
 import express, { Request, Response, NextFunction } from 'express';
-// import cors from 'cors';
 import nodemailer from 'nodemailer';
 import { Pool } from 'pg';
 
